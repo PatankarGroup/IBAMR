@@ -105,6 +105,79 @@ c
       return
       end
 c
+
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes G = alpha grad U.
+c
+c     NN: Uses Godunov upwinding to compute the cell centered total
+c     gradient of a cell centered variable U.
+c
+c     This is a total gradient in the sense that each component of the
+c     gradient is computed for each cell center.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctocgradupwind2d(
+     &     G,G_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER G_gcw,U_gcw
+
+      REAL alpha
+
+      REAL U(CELL2d(ilower,iupper,U_gcw))
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL G(CELL2d(ilower,iupper,G_gcw),0:NDIM-1)
+c
+c     Local variables.
+c
+      INTEGER i0,i1
+      REAL    uxmin,uymin
+      REAL    Gx,Gy
+      REAL    wgt0,wgt1
+c
+c     Compute the cell centered total gradient of U.
+c
+      wgt0 = alpha/dx(0)
+      wgt1 = alpha/dx(1)
+
+      do i1 = ilower1,iupper1
+         do i0 = ilower0,iupper0
+            uxmin = dmin1(U(i0+1,i1),U(i0-1,i1))
+            Gx = dmax1(wgt0*(U(i0,i1)-uxmin), 0.d0)
+            G(i0,i1,0) = Gx
+         enddo
+      enddo
+      do i1 = ilower1,iupper1
+         do i0 = ilower0,iupper0
+            uymin = dmin1(U(i0,i1+1),U(i0, i1-1))
+            Gy = dmax1(wgt1*(U(i0,i1)-uymin), 0.d0)
+            G(i0,i1,1) = Gy
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes G = alpha grad U + beta V.
@@ -173,6 +246,89 @@ c
       return
       end
 c
+
+
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes G = alpha grad U + beta V.
+c
+c     NN: Uses Godunov upwinding to compute the cell centered total
+c     gradient of a cell centered variable U.
+c
+c     This is a total gradient in the sense that each component of the
+c     gradient is computed for each cell center.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctocgradupwindadd2d(
+     &     G,G_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     beta,
+     &     V,V_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER G_gcw,U_gcw,V_gcw
+
+      REAL alpha
+
+      REAL U(CELL2d(ilower,iupper,U_gcw))
+      
+      REAL beta
+
+      REAL V(CELL2d(ilower,iupper,V_gcw),0:NDIM-1)
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL G(CELL2d(ilower,iupper,G_gcw),0:NDIM-1)
+c
+c     Local variables.
+c
+      INTEGER i0,i1
+      REAL    uxmin,uymin
+      REAL    Gx,Gy
+      REAL    wgt0,wgt1
+c
+c     Compute the cell centered total gradient of U.
+c
+      wgt0 = alpha/dx(0)
+      wgt1 = alpha/dx(1)
+
+      do i1 = ilower1,iupper1
+         do i0 = ilower0,iupper0
+            uxmin = dmin1(U(i0+1,i1),U(i0-1,i1))
+            Gx = dmax1(wgt0*(U(i0,i1)-uxmin), 0.d0)
+            G(i0,i1,0) = Gx + beta*V(i0,i1,0)
+         enddo
+      enddo
+      do i1 = ilower1,iupper1
+         do i0 = ilower0,iupper0
+            uymin = dmin1(U(i0,i1+1),U(i0, i1-1))
+            Gy = dmax1(wgt1*(U(i0,i1)-uymin), 0.d0)
+            G(i0,i1,1) = Gy + beta*V(i0,i1,1)
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
+
+
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U.
@@ -369,6 +525,102 @@ c
       return
       end
 c
+
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes g = alpha grad U.
+c
+c     NN: Uses first-order Godunov upwinding to compute the side
+c     centered partial gradient of a cell centered variable U.
+c
+c     This is a partial gradient in the sense that only the normal
+c     component of the gradient is computed on each side.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctosgradupwind2d(
+     &     g0,g1,g_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER g_gcw,U_gcw
+
+      REAL alpha
+
+      REAL U(CELL2d(ilower,iupper,U_gcw))
+
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL g0(SIDE2d0(ilower,iupper,g_gcw))
+      REAL g1(SIDE2d1(ilower,iupper,g_gcw))
+c
+c     Local variables.
+c
+      INTEGER i0,i1
+      REAL    fac0,fac1
+      REAL    uxmin,uymin
+      REAL    Uw,Upx,Ue
+      REAL    Un,Upy,Us
+      REAL    Gx,Gy
+
+c
+c     Compute the side centered partial gradient of U.
+c
+      fac0 = alpha/dx(0)
+      fac1 = alpha/dx(1)
+
+      do i1 = ilower1,iupper1
+         do i0 = ilower0,iupper0+1
+c
+c           Compute interpolation of U onto sides
+c
+            Uw  = 0.5d0*(U(i0-1,i1)+ U(i0-2,i1))
+            Upx = 0.5d0*(U(i0,i1)  + U(i0-1,i1))
+            Ue  = 0.5d0*(U(i0,i1)  + U(i0+1,i1))
+c
+c     Now do normal upwinding
+c
+            uxmin = dmin1(Uw,Ue)
+            Gx = dmax1(fac0*(Upx-uxmin), 0.d0)
+ 
+            g0(i0,i1) = Gx
+         enddo
+      enddo
+
+      do i1 = ilower1,iupper1+1
+         do i0 = ilower0,iupper0
+            Un  = 0.5d0*(U(i0,i1)  + U(i0,i1+1))
+            Us  = 0.5d0*(U(i0,i1-1)+ U(i0,i1-2))
+            Upy = 0.5d0*(U(i0,i1)  + U(i0,i1-1))
+
+            uymin = dmin1(Un,Us)
+            Gy = dmax1(fac1*(Upy-uymin), 0.d0)
+ 
+            g1(i0,i1) = Gy
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
+
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U + beta v.

@@ -119,6 +119,96 @@ c
       return
       end
 c
+
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes G = alpha grad U.
+c
+c     NN: Uses Godunov upwinding to compute the cell centered total
+c     gradient of a cell centered variable U.
+c
+c     This is a total gradient in the sense that each component of the
+c     gradient is computed for each cell center.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctocgradupwind3d(
+     &     G,G_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     ilower2,iupper2,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER ilower2,iupper2
+      INTEGER G_gcw,U_gcw
+
+      REAL alpha
+
+      REAL U(CELL3d(ilower,iupper,U_gcw))
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL G(CELL3d(ilower,iupper,G_gcw),0:NDIM-1)
+c
+c     Local variables.
+c
+      INTEGER i0,i1,i2
+      REAL    uxmin,uymin,uzmin
+      REAL    wgt0,wgt1,wgt2
+      REAL    Gx,Gy,Gz
+c
+c     Compute the cell centered total gradient of U.
+c
+      wgt0 = alpha/(dx(0))
+      wgt1 = alpha/(dx(1))
+      wgt2 = alpha/(dx(2))
+
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uxmin = dmin1(U(i0+1,i1,i2),U(i0-1,i1,i2))
+               Gx = dmax1(wgt0*(U(i0,i1,i2)-uxmin), 0.d0)
+               G(i0,i1,i2,0) = Gx
+            enddo
+         enddo
+      enddo
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uymin = dmin1(U(i0,i1+1,i2),U(i0,i1-1,i2))
+               Gy = dmax1(wgt1*(U(i0,i1,i2)-uymin), 0.d0)
+               G(i0,i1,i2,1) = Gy
+            enddo
+         enddo
+      enddo
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uzmin = dmin1(U(i0,i1,i2+1),U(i0,i1,i2-1))
+               Gz = dmax1(wgt2*(U(i0,i1,i2)-uzmin), 0.d0)
+               G(i0,i1,i2,2) = Gz
+            enddo
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes G = alpha grad U + beta V.
@@ -204,6 +294,110 @@ c
       return
       end
 c
+
+
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes G = alpha grad U.
+c
+c     NN: Uses Godunov upwinding to compute the cell centered total
+c     gradient of a cell centered variable U.
+c
+c     This is a total gradient in the sense that each component of the
+c     gradient is computed for each cell center.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctocgradupwindadd3d(
+     &     G,G_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     beta,
+     &     V,V_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     ilower2,iupper2,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER ilower2,iupper2
+      INTEGER G_gcw,U_gcw,V_gcw
+
+      REAL alpha
+
+      REAL U(CELL3d(ilower,iupper,U_gcw))
+      
+      REAL beta
+
+      REAL V(CELL3d(ilower,iupper,V_gcw),0:NDIM-1)
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL G(CELL3d(ilower,iupper,G_gcw),0:NDIM-1)
+c
+c     Local variables.
+c
+      INTEGER i0,i1,i2
+      REAL    uxmin,uymin,uzmin
+      REAL    wgt0,wgt1,wgt2
+      REAL    Gx,Gy,Gz
+c
+c     Compute the cell centered total gradient of U.
+c
+      wgt0 = alpha/(dx(0))
+      wgt1 = alpha/(dx(1))
+      wgt2 = alpha/(dx(2))
+
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uxmin = dmin1(U(i0+1,i1,i2),U(i0-1,i1,i2))
+               Gx = dmax1(wgt0*(U(i0,i1,i2)-uxmin), 0.d0)
+               G(i0,i1,i2,0) = Gx + beta*V(i0,i1,i2,0)
+            enddo
+         enddo
+      enddo
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uymin = dmin1(U(i0,i1+1,i2),U(i0,i1-1,i2))
+               Gy = dmax1(wgt1*(U(i0,i1,i2)-uymin), 0.d0)
+               G(i0,i1,i2,1) = Gy + beta*V(i0,i1,i2,1)
+            enddo
+         enddo
+      enddo
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               uzmin = dmin1(U(i0,i1,i2+1),U(i0,i1,i2-1))
+               Gz = dmax1(wgt2*(U(i0,i1,i2)-uzmin), 0.d0)
+               G(i0,i1,i2,2) = Gz + beta*V(i0,i1,i2,2)
+            enddo
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
+
+
+
+
+
+
+
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U.
@@ -282,6 +476,7 @@ c
       return
       end
 c
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U + beta v.
@@ -371,6 +566,8 @@ c
       return
       end
 c
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U.
@@ -449,6 +646,120 @@ c
       return
       end
 c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     Computes g = alpha grad U.
+c
+c     NN: Uses first-order Godunov upwinding to compute the side
+c     centered partial gradient of a cell centered variable U.
+c
+c     This is a partial gradient in the sense that only the normal
+c     component of the gradient is computed on each side.
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+      subroutine ctosgradupwind3d(
+     &     g0,g1,g2,g_gcw,
+     &     alpha,
+     &     U,U_gcw,
+     &     ilower0,iupper0,
+     &     ilower1,iupper1,
+     &     ilower2,iupper2,
+     &     dx)
+c
+      implicit none
+c
+c     Input.
+c
+      INTEGER ilower0,iupper0
+      INTEGER ilower1,iupper1
+      INTEGER ilower2,iupper2
+      INTEGER g_gcw,U_gcw
+
+      REAL alpha
+
+      REAL U(CELL3d(ilower,iupper,U_gcw))
+
+      REAL dx(0:NDIM-1)
+c
+c     Input/Output.
+c
+      REAL g0(SIDE3d0(ilower,iupper,g_gcw))
+      REAL g1(SIDE3d1(ilower,iupper,g_gcw))
+      REAL g2(SIDE3d2(ilower,iupper,g_gcw))
+c
+c     Local variables.
+c
+      INTEGER i0,i1,i2
+      REAL    fac0,fac1,fac2
+      REAL    uxmin,uymin,uzmin
+      REAL    Uw,Upx,Ue
+      REAL    Un,Upy,Us
+      REAL    Ut,Upz,Ub
+      REAL    Gx,Gy,Gz
+
+c
+c     Compute the side centered partial gradient of U.
+c
+      fac0 = alpha/dx(0)
+      fac1 = alpha/dx(1)
+      fac2 = alpha/dx(2)
+
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0+1
+c
+c              Compute interpolation of U onto sides
+c
+               Uw  = 0.5d0*(U(i0-1,i1,i2)+ U(i0-2,i1,i2))
+               Upx = 0.5d0*(U(i0,i1,i2)  + U(i0-1,i1,i2))
+               Ue  = 0.5d0*(U(i0,i1,i2)  + U(i0+1,i1,i2))
+c
+c              Now do normal upwinding
+c
+               uxmin = dmin1(Uw,Ue)
+               Gx = dmax1(fac0*(Upx-uxmin), 0.d0)
+ 
+               g0(i0,i1,i2) = Gx
+            enddo
+         enddo
+      enddo
+
+      do i2 = ilower2,iupper2
+         do i1 = ilower1,iupper1+1
+            do i0 = ilower0,iupper0
+               Un  = 0.5d0*(U(i0,i1,i2)  + U(i0,i1+1,i2))
+               Us  = 0.5d0*(U(i0,i1-1,i2)+ U(i0,i1-2,i2))
+               Upy = 0.5d0*(U(i0,i1,i2)  + U(i0,i1-1,i2))
+
+               uymin = dmin1(Un,Us)
+               Gy = dmax1(fac1*(Upy-uymin), 0.d0)
+ 
+               g1(i0,i1,i2) = Gy
+            enddo
+         enddo
+      enddo
+      
+      do i2 = ilower2,iupper2+1
+         do i1 = ilower1,iupper1
+            do i0 = ilower0,iupper0
+               Ut  = 0.5d0*(U(i0,i1,i2)  + U(i0,i1,i2+1))
+               Ub  = 0.5d0*(U(i0,i1,i2-1)+ U(i0,i1,i2-2))
+               Upz = 0.5d0*(U(i0,i1,i2)  + U(i0,i1,i2-1))
+
+               uzmin = dmin1(Ut,Ub)
+               Gz = dmax1(fac2*(Upz-uzmin), 0.d0)
+ 
+               g2(i0,i1,i2) = Gz
+            enddo
+         enddo
+      enddo
+c
+      return
+      end
+c
+
+
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Computes g = alpha grad U + beta v.

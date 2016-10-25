@@ -155,6 +155,24 @@ public:
               SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
 
     /*!
+     * \brief NN: Computes dst = stress src.
+     *
+     * Uses centered differences.
+     */
+    void stress(SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeData<NDIM, double> > dst,
+                SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > src,
+                SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
+	      
+    /*!
+     * \brief NN: Computes dst = stress src.
+     *
+     * Uses centered differences.
+     */
+    void stress(SAMRAI::tbox::Pointer<SAMRAI::pdat::EdgeData<NDIM, double> > dst,
+                SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > src,
+                SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
+
+    /*!
      * \brief Computes dst = rot src.
      *
      * Uses centered differences.
@@ -252,6 +270,18 @@ public:
               SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src2,
               SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch,
               int l = 0) const;
+    /*!
+     * \brief NN: Computes dst = alpha grad src1_l + beta src2.
+     *
+     * Uses first-order Godunov upwind differences.
+     */
+    void gradUpwind(SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > dst,
+              double alpha,
+              SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src1,
+              double beta,
+              SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src2,
+              SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch,
+              int l = 0) const;
 
     /*!
      * \brief Computes dst = alpha grad src1_l + beta src2.
@@ -265,6 +295,19 @@ public:
               SAMRAI::tbox::Pointer<SAMRAI::pdat::FaceData<NDIM, double> > src2,
               SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch,
               int l = 0) const;
+
+    /*!
+     * \brief Computes dst = alpha grad src1_l + beta src2.
+     *
+     * Uses Godunov upwinding.
+     */
+    void gradUpwind(SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > dst,
+              	    double alpha,
+                    SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src1,
+                    double beta,
+                    SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > src2,
+                    SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch,
+                    int l = 0) const;
 
     /*!
      * \brief Computes dst = alpha grad src1_l + beta src2.
@@ -334,6 +377,22 @@ public:
      * vector field src by spatial averaging.
      */
     void interp(SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > dst,
+                SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src,
+                SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
+
+    /*!
+     * \brief Computes the node-centered vector field dst from the cell-centered
+     * vector field src by spatial averaging.
+     */
+    void interp(SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeData<NDIM, double> > dst,
+                SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src,
+                SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
+
+    /*!
+     * \brief Computes the edge-centered vector field dst from the cell-centered
+     * vector field src by spatial averaging.
+     */
+    void interp(SAMRAI::tbox::Pointer<SAMRAI::pdat::EdgeData<NDIM, double> > dst,
                 SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src,
                 SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
 
@@ -418,6 +477,27 @@ public:
                     int l = 0,
                     int m = 0,
                     int n = 0) const;
+
+    /*!
+     * \brief Computes dst_l = alpha div coef (2*src1), where src = 1/2(grad(u) + grad(u)^T)
+     */
+    void vc_laplace(SAMRAI::tbox::Pointer<SAMRAI::pdat::SideData<NDIM, double> > dst,
+                    double alpha,
+                    SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > coef_cc,
+                    SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > src1_cc,
+                    SAMRAI::tbox::Pointer<SAMRAI::pdat::EdgeData<NDIM, double> > coef_ec,
+		    SAMRAI::tbox::Pointer<SAMRAI::pdat::EdgeData<NDIM, double> > src1_ec,
+                    SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch,
+                    int l = 0,
+                    int m = 0,
+                    int n = 0) const;
+		    
+		    
+    /*!
+     * \brief Carry out fast-sweeping algorithm
+     */
+    void fastSweep(SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > dst,
+		   SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
 
     /*!
      * \brief Compute dst_i = alpha src1_j + beta src2_k, pointwise.

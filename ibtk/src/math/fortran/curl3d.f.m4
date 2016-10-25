@@ -608,6 +608,7 @@ c
             do i0 = ilower0,iupper0
                W0(i0,i1,i2) = (U2(i0,i1,i2) - U2(i0,i1-1,i2)  )/dx(1)  
      &                      - (U1(i0,i1,i2) - U1(i0,i1  ,i2-1))/dx(2)
+     
             enddo
          enddo
       enddo
