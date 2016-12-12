@@ -640,6 +640,12 @@ public:
     void pointwiseMaxNorm(SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeData<NDIM, double> > dst,
                           SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeData<NDIM, double> > src,
                           SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
+			  
+    /*!
+     * \brief Carry out fast-sweeping algorithm
+     */
+    void fastSweep(SAMRAI::tbox::Pointer<SAMRAI::pdat::CellData<NDIM, double> > dst,
+		   SAMRAI::tbox::Pointer<SAMRAI::hier::Patch<NDIM> > patch) const;
 
     //\}
 

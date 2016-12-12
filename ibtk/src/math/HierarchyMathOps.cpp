@@ -3004,6 +3004,26 @@ HierarchyMathOps::pointwiseMaxNorm(const int dst_idx,
     return;
 } // pointwiseMaxNorm
 
+void HierarchyMathOps::fastSweep(const int dst_idx,
+				 const Pointer<CellVariable<NDIM, double> > /*dst_var*/)
+{
+    for (int ln = d_coarsest_ln; ln <= d_finest_ln; ++ln)
+    {
+        Pointer<PatchLevel<NDIM> > level = d_hierarchy->getPatchLevel(ln);
+
+        for (PatchLevel<NDIM>::Iterator p(level); p; p++)
+        {
+            Pointer<Patch<NDIM> > patch = level->getPatch(p());
+
+            Pointer<CellData<NDIM, double> > dst_data = patch->getPatchData(dst_idx);
+
+            d_patch_math_ops.fastSweep(dst_data, patch);
+        }
+    }
+    return;
+} // fastSweep
+
+
 /////////////////////////////// PRIVATE //////////////////////////////////////
 
 void

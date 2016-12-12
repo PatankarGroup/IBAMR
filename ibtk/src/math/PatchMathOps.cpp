@@ -72,6 +72,8 @@
 #define PW_L2_NORM_FC IBTK_FC_FUNC(pwl2norm2d, PWL2NORM2D)
 #define PW_MAX_NORM_FC IBTK_FC_FUNC(pwmaxnorm2d, PWMAXNORM2D)
 
+#define FAST_SWEEP_FC IBTK_FC_FUNC(fastsweep2d, FASTSWEEP2D)
+
 #define C_TO_C_CURL_FC IBTK_FC_FUNC(ctoccurl2d, CTOCCURL2D)
 #define C_TO_C_DIV_FC IBTK_FC_FUNC(ctocdiv2d, CTOCDIV2D)
 #define C_TO_C_DIV_ADD_FC IBTK_FC_FUNC(ctocdivadd2d, CTOCDIVADD2D)
@@ -133,6 +135,8 @@
 #define PW_L1_NORM_FC IBTK_FC_FUNC(pwl1norm3d, PWL1NORM3D)
 #define PW_L2_NORM_FC IBTK_FC_FUNC(pwl2norm3d, PWL2NORM3D)
 #define PW_MAX_NORM_FC IBTK_FC_FUNC(pwmaxnorm3d, PWMAXNORM3D)
+
+#define FAST_SWEEP_FC IBTK_FC_FUNC(fastsweep3d, FASTSWEEP3D)
 
 #define C_TO_C_CURL_FC IBTK_FC_FUNC(ctoccurl3d, CTOCCURL3D)
 #define C_TO_C_DIV_FC IBTK_FC_FUNC(ctocdiv3d, CTOCDIV3D)
@@ -470,6 +474,19 @@ void PW_MAX_NORM_FC(double* U,
                     const int& iupper2
 #endif
                     );
+
+void FAST_SWEEP_FC(double* U,
+		   const int& U_gcw,
+		   const int& ilower0,
+		   const int& iupper0,
+		   const int& ilower1,
+		   const int& iupper1,
+#if (NDIM == 3)
+                  
+                  const int& ilower2,
+                  const int& iupper2,
+#endif
+		   const double* dx);
 
 void C_TO_C_ANISO_F_LAPLACE_FC(double* F,
                                const int& F_gcw,
@@ -6929,6 +6946,28 @@ PatchMathOps::pointwiseMaxNorm(Pointer<NodeData<NDIM, double> > dst,
                        );
     return;
 } // pointwiseMaxNorm
+
+void PatchMathOps::fastSweep(Pointer<CellData<NDIM, double> > dst,
+                             const Pointer<Patch<NDIM> > patch) const
+{
+    double* const D = dst->getPointer(0);
+    const int D_ghosts = (dst->getGhostCellWidth()).max();
+
+    const Box<NDIM>& patch_box = patch->getBox();
+    const Pointer<CartesianPatchGeometry<NDIM> > pgeom = patch->getPatchGeometry();
+    const double* const dx = pgeom->getDx();
+
+
+    FAST_SWEEP_FC(D, D_ghosts, patch_box.lower(0), patch_box.upper(0),
+                  patch_box.lower(1), patch_box.upper(1)
+#if (NDIM == 3)
+                         ,
+                     patch_box.lower(2), patch_box.upper(2)
+#endif
+		  ,dx);
+
+    return;
+} // fastSweep
 
 /////////////////////////////// PROTECTED ////////////////////////////////////
 

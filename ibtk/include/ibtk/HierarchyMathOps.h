@@ -1148,6 +1148,15 @@ public:
                           SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeVariable<NDIM, double> > dst_var,
                           int src_idx,
                           SAMRAI::tbox::Pointer<SAMRAI::pdat::NodeVariable<NDIM, double> > src_var);
+    
+    /*!
+     * \brief Carry out the fast-sweeping algorithm on dst
+     *
+     * \see setPatchHierarchy
+     * \see resetLevels
+     */
+    void fastSweep(int dst_idx,
+		   SAMRAI::tbox::Pointer<SAMRAI::pdat::CellVariable<NDIM, double> > dst_var);
 
 private:
     /*!
